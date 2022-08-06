@@ -8,5 +8,5 @@ Thread 1 :
             Avoid bottleneck
 
 Thread 2 :
-    Loop: Get values from DF (not DB) and update GUI (refresh rate 300ms)
+    Loop: Get values from the latest DF (not DB) and update GUI (refresh rate 300ms)
 """
