@@ -9,4 +9,6 @@ Thread 1 :
 
 Thread 2 :
     Loop: Get values from the latest DF (not DB) and update GUI (refresh rate 300ms)
+
+In all cases error handling and logging is to be done
 """
