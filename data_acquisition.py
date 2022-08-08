@@ -1,3 +1,5 @@
+import pandas as pd
+import sqlalchemy
 from pymodbus.client.sync import ModbusSerialClient
 import datetime
 from pymodbus.payload import BinaryPayloadDecoder
@@ -26,44 +28,58 @@ for i, slave_id in enumerate(slave_id_name_dict.keys()):
         traceback.print_exc()
 """Initialization Complete"""
 # slave_obj_list = [1,2,3]
+uri = "mysql://root:por1BABU@localhost/modbus_scada_db"
+engine = sqlalchemy.create_engine(uri, echo=True)
 
-for i, slave in zip(slave_id_name_dict.keys(), slave_obj_list):
+while True:
+    df_analog_val = pd.DataFrame(columns=['v', 'ia', 'ib', 'ic', 'p', 'q'])
+    df_frequency = pd.DataFrame(columns=['f'])
+
+    for i, slave in zip(slave_id_name_dict.keys(), slave_obj_list):
+        try:
+            # f = slave.get_frequency()
+            # print(f'{datetime.datetime.now()}: {slave_id_name_dict[i]} f = {f}')
+
+            v = slave.get_voltage_LL_average()
+            print(f'{datetime.datetime.now()}: {slave_id_name_dict[i]} v = {v}')
+
+            ia = slave.get_current_a()
+            print(f'{datetime.datetime.now()}: {slave_id_name_dict[i]} ia = {ia}')
+
+            ib = slave.get_current_b()
+            print(f'{datetime.datetime.now()}: {slave_id_name_dict[i]} ib = {ib}')
+
+            ic = slave.get_current_c()
+            print(f'{datetime.datetime.now()}: {slave_id_name_dict[i]} ic = {ic}')
+
+            # i_n = slave.get_current_neutral()
+            # print(f'{datetime.datetime.now()}: {slave_id_name_dict[i]} in = {i_n}')
+
+            p = slave.get_real_power_total()
+            print(f'{datetime.datetime.now()}: {slave_id_name_dict[i]} p = {p}')
+
+            q = slave.get_reactive_power_total()
+            print(f'{datetime.datetime.now()}: {slave_id_name_dict[i]} q = {q}')
+
+            # p_import = slave.get_import_real_energy_total()
+            # print(f'{datetime.datetime.now()}: {slave_id_name_dict[i]} p_import = {p_import}')
+            #
+            # q_import = slave.get_import_reactive_energy_total()
+            # print(f'{datetime.datetime.now()}: {slave_id_name_dict[i]} q_import = {q_import}')
+            #
+            # p_export = slave.get_export_real_energy_total()
+            # print(f'{datetime.datetime.now()}: {slave_id_name_dict[i]} p_export = {p_export}')
+            #
+            # q_export = slave.get_export_reactive_energy_total()
+            # print(f'{datetime.datetime.now()}: {slave_id_name_dict[i]} q_export = {q_export}')
+            df_analog_val.loc[(datetime.datetime.now(), i), :] = [v, ia, ib, ib, ic, p, q]
+            df_analog_val.to_sql('analog_data', con=engine, if_exists='append')
+        except Exception:
+            traceback.print_exc()
     try:
-        f = slave.get_frequency()
-        print(f'{datetime.datetime.now()}: {slave_id_name_dict[i]} f = {f}')
-
-        v = slave.get_voltage_LL_average()
-        print(f'{datetime.datetime.now()}: {slave_id_name_dict[i]} v = {v}')
-
-        ia = slave.get_current_a()
-        print(f'{datetime.datetime.now()}: {slave_id_name_dict[i]} ia = {ia}')
-
-        ib = slave.get_current_b()
-        print(f'{datetime.datetime.now()}: {slave_id_name_dict[i]} ib = {ib}')
-
-        ic = slave.get_current_c()
-        print(f'{datetime.datetime.now()}: {slave_id_name_dict[i]} ic = {ic}')
-
-        i_n = slave.get_current_neutral()
-        print(f'{datetime.datetime.now()}: {slave_id_name_dict[i]} in = {i_n}')
-
-        p = slave.get_real_power_total()
-        print(f'{datetime.datetime.now()}: {slave_id_name_dict[i]} p = {p}')
-
-        q = slave.get_reactive_power_total()
-        print(f'{datetime.datetime.now()}: {slave_id_name_dict[i]} q = {q}')
-
-        p_import = slave.get_import_real_energy_total()
-        print(f'{datetime.datetime.now()}: {slave_id_name_dict[i]} p_import = {p_import}')
-
-        q_import = slave.get_import_reactive_energy_total()
-        print(f'{datetime.datetime.now()}: {slave_id_name_dict[i]} q_import = {q_import}')
-
-        p_export = slave.get_export_real_energy_total()
-        print(f'{datetime.datetime.now()}: {slave_id_name_dict[i]} p_export = {p_export}')
-
-        q_export = slave.get_export_reactive_energy_total()
-        print(f'{datetime.datetime.now()}: {slave_id_name_dict[i]} q_export = {q_export}')
-    except Exception:
-        traceback.print_exc()
-
+        f = slave_obj_list[0].get_frequency()
+        print(f'{datetime.datetime.now()}: {slave_id_name_dict[0]} f = {f}')
+        df_frequency.loc[datetime.datetime.now(), 'f'] = f
+        df_frequency.to_sql('frequency', con=engine, if_exists='append')
+    except:
+        pass

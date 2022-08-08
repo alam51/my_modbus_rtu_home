@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+
 import pandas as pd
 import numpy as np
 # import blaze
@@ -75,7 +75,7 @@ def main():
     # using_odo('table1', uri)
     using_pandas('table4', uri)
     using_cursor_correct('table3', uri)
-    using_cursor('table2', uri)
+    # using_cursor('table2', uri)
 
     for i in (2, 3, 4):
         count = pd.read_sql('SELECT COUNT(*) as c FROM table%s' % i, con=uri)['c'][0]
